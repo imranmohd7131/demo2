@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${shopName}">Lakshmi Jewellers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --gold: #c9a84c;
+            --gold-dark: #8b6914;
+            --gold-light: #f5e6b8;
+            --dark: #1a0f00;
+            --brown: #3a2a1a;
+            --cream: #fdf8f0;
+            --white: #ffffff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Lato', sans-serif; background: var(--cream); color: var(--brown); }
+
+        /* TOPBAR */
+        .topbar {
+            background: var(--dark);
+            color: #ccc;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 40px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .topbar a { color: var(--gold); text-decoration: none; }
+
+        /* NAVBAR */
+        nav {
+            background: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold-dark); }
+        .nav-logo span { color: var(--gold); }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--brown); font-size: 0.95rem; letter-spacing: 0.5px; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-actions { display: flex; gap: 16px; align-items: center; }
+        .cart-btn {
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            padding: 9px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+            position: relative;
+        }
+        .cart-count {
+            background: #e53935;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            position: absolute;
+            top: -6px; right: -6px;
+        }
+
+        /* HERO */
+        .hero {
+            background: linear-gradient(135deg, #1a0f00 0%, #3a2a1a 50%, #1a0f00 100%);
+            min-height: 88vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(201,168,76,0.15) 0%, transparent 70%);
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 700px; }
+        .hero-badge {
+            display: inline-block;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 5px 18px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.8rem;
+            color: var(--white);
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+        .hero h1 span { color: var(--gold); }
+        .hero p { color: #ccc; font-size: 1.1rem; margin-bottom: 32px; font-weight: 300; }
+        .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn-primary {
+            padding: 14px 36px;
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,168,76,0.4); }
+        .btn-outline {
+            padding: 14px 36px;
+            background: transparent;
+            color: var(--white);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* STATS */
+        .stats {
+            background: var(--gold);
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+        }
+        .stat {
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+            padding: 24px 20px;
+            border-right: 1px solid rgba(0,0,0,0.1);
+        }
+        .stat:last-child { border-right: none; }
+        .stat h3 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--dark); }
+        .stat p { font-size: 0.85rem; color: var(--brown); font-weight: 600; }
+
+        /* CATEGORIES */
+        .section { padding: 60px 40px; max-width: 1200px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 40px; }
+        .section-header h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--brown); }
+        .section-header p { color: #888; margin-top: 8px; }
+        .section-header .divider {
+            width: 60px; height: 3px;
+            background: linear-gradient(to right, var(--gold-dark), var(--gold));
+            margin: 12px auto 0;
+            border-radius: 2px;
+        }
+
+        .cat-grid { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .cat-card {
+            background: var(--white);
+            border: 2px solid var(--gold-light);
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+        .cat-card:hover, .cat-card.active { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+        .cat-card .cat-icon { font-size: 2rem; margin-bottom: 8px; }
+        .cat-card span { font-size: 0.85rem; font-weight: 600; display: block; }
+
+        /* PRODUCTS */
+        .products-bg { background: #f7f0e6; padding: 60px 0; }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 24px;
+            padding: 0 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .product-card {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 16px rgba(180,140,20,0.1);
+            transition: transform 0.25s, box-shadow 0.25s;
+            position: relative;
+        }
+        .product-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(180,140,20,0.2); }
+        .featured-badge {
+            position: absolute;
+            top: 12px; left: 12px;
+            background: var(--gold);
+            color: var(--dark);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .wishlist-btn {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 34px; height: 34px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .wishlist-btn:hover { transform: scale(1.2); }
+        .product-img {
+            height: 180px;
+            background: linear-gradient(135deg, #fdf3d0, #f0dfa0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5rem;
+        }
+        .product-body { padding: 16px; }
+        .product-cat {
+            font-size: 0.72rem;
+            background: var(--gold-light);
+            color: var(--gold-dark);
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .product-body h3 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: 6px; }
+        .product-body p { font-size: 0.82rem; color: #888; margin-bottom: 10px; line-height: 1.5; }
+        .product-rating { font-size: 0.8rem; color: #f5a623; margin-bottom: 4px; }
+        .product-rating span { color: #888; margin-left: 4px; }
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-top: 1px solid #f5e8c0;
+        }
+        .product-price { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--gold-dark); }
+        .add-cart-btn {
+            padding: 8px 18px;
+            background: var(--brown);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: background 0.2s;
+        }
+        .add-cart-btn:hover { background: var(--gold-dark); }
+
+        /* TESTIMONIALS */
+        .testimonials-bg { background: var(--dark); padding: 60px 40px; }
+        .testimonials-bg .section-header h2 { color: var(--white); }
+        .testimonials-bg .section-header p { color: #aaa; }
+        .testi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
+        .testi-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(201,168,76,0.2);
+            border-radius: 16px;
+            padding: 28px;
+            transition: border-color 0.2s;
+        }
+        .testi-card:hover { border-color: var(--gold); }
+        .testi-card .stars { font-size: 1rem; margin-bottom: 12px; }
+        .testi-card p { color: #ccc; font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; font-style: italic; }
+        .testi-card .author { color: var(--gold); font-weight: 600; font-size: 0.9rem; }
+
+        /* NEWSLETTER */
+        .newsletter {
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+            padding: 60px 40px;
+            text-align: center;
+        }
+        .newsletter h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--dark); margin-bottom: 10px; }
+        .newsletter p { color: var(--brown); margin-bottom: 24px; }
+        .newsletter-form { display: flex; justify-content: center; gap: 0; max-width: 460px; margin: 0 auto; }
+        .newsletter-form input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 30px 0 0 30px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .newsletter-form button {
+            padding: 14px 24px;
+            background: var(--dark);
+            color: var(--gold);
+            border: none;
+            border-radius: 0 30px 30px 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* INFO BAR */
+        .info-bar {
+            background: var(--brown);
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+        }
+        .info-item {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            padding: 28px 20px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            color: #ccc;
+        }
+        .info-item:last-child { border-right: none; }
+        .info-item .icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .info-item h4 { color: var(--gold); font-size: 0.9rem; margin-bottom: 4px; }
+        .info-item p { font-size: 0.82rem; }
+
+        /* FOOTER */
+        footer {
+            background: var(--dark);
+            color: #666;
+            text-align: center;
+            padding: 24px;
+            font-size: 0.82rem;
+        }
+        footer span { color: var(--gold); }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .product-card { animation: fadeInUp 0.4s ease both; }
+    </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <span>📞 +91 98765 43210 &nbsp;|&nbsp; ✉️ <a href="#">info@lakshmijewellers.com</a></span>
+    <span>🚚 Free delivery on orders above ₹10,000 &nbsp;|&nbsp; 🏪 MG Road, City Center</span>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+    <div class="nav-logo">💍 <span th:text="${shopName}">Lakshmi Jewellers</span></div>
+    <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#collection">Collections</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+        <button class="cart-btn" onclick="alert('Cart feature coming soon!')">
+            🛒 Cart <span class="cart-count" id="cartCount">0</span>
+        </button>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">✦ New Collection 2026 ✦</div>
+        <h1>Where Every Piece<br/>Tells a <span>Golden Story</span></h1>
+        <p>Handcrafted jewellery for life's most precious moments</p>
+        <div class="hero-btns">
+            <button class="btn-primary" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+            <button class="btn-outline" onclick="document.getElementById('testimonials').scrollIntoView({behavior:'smooth'})">Our Story</button>
+        </div>
+    </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat"><h3>38+</h3><p>Years of Craftsmanship</p></div>
+    <div class="stat"><h3>5000+</h3><p>Happy Customers</p></div>
+    <div class="stat"><h3>200+</h3><p>Unique Designs</p></div>
+    <div class="stat"><h3>100%</h3><p>Certified Gold & Gems</p></div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section">
+    <div class="section-header">
+        <h2>Shop by Category</h2>
+        <p>Find the perfect piece for every occasion</p>
+        <div class="divider"></div>
+    </div>
+    <div class="cat-grid">
+        <div class="cat-card active" onclick="setFilter('All', this)">
+            <div class="cat-icon">✨</div><span>All</span>
+        </div>
+        <div class="cat-card" onclick="setFilter('Rings', this)">
+            <div class="cat-icon">💍</div><span>Rings</span>
+        </div>
+        <div class="cat-card" onclick="setFilter('Earrings', this)">
+            <div class="cat-icon">🌟</div><span>Earrings</span>
+        </div>
+        <div class="cat-card" onclick="setFilter('Necklaces', this)">
+            <div class="cat-icon">📿</div><span>Necklaces</span>
+        </div>
+        <div class="cat-card" onclick="setFilter('Bracelets', this)">
+            <div class="cat-icon">💚</div><span>Bracelets</span>
+        </div>
+        <div class="cat-card" onclick="setFilter('Nose Pins', this)">
+            <div class="cat-icon">💎</div><span>Nose Pins</span>
+        </div>
+        <div class="cat-card" onclick="setFilter('Anklets', this)">
+            <div class="cat-icon">🦶</div><span>Anklets</span>
+        </div>
+    </div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="products-bg" id="collection">
+    <div style="max-width:1200px;margin:0 auto;padding:0 40px 24px;">
+        <div class="section-header">
+            <h2>Our Collections</h2>
+            <p>Timeless pieces crafted with love and precision</p>
+            <div class="divider"></div>
+        </div>
+    </div>
+    <div class="product-grid" id="productGrid">
+        <div class="product-card"
+             th:each="p : ${products}"
+             th:attr="data-category=${p.category()}">
+            <span class="featured-badge" th:if="${p.featured()}">⭐ Featured</span>
+            <button class="wishlist-btn" onclick="toggleWishlist(this)">🤍</button>
+            <div class="product-img"><span th:text="${p.icon()}"></span></div>
+            <div class="product-body">
+                <span class="product-cat" th:text="${p.category()}"></span>
+                <h3 th:text="${p.name()}"></h3>
+                <p th:text="${p.description()}"></p>
+                <div class="product-rating">
+                    ★★★★★ <span th:text="'(' + ${p.reviews()} + ' reviews)'"></span>
+                </div>
+            </div>
+            <div class="product-footer">
+                <span class="product-price" th:text="${p.price()}"></span>
+                <button class="add-cart-btn" onclick="addToCart(this)">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="testimonials-bg" id="testimonials">
+    <div class="section-header">
+        <h2>What Our Customers Say</h2>
+        <p>Real stories from real people</p>
+        <div class="divider"></div>
+    </div>
+    <div class="testi-grid">
+        <div class="testi-card" th:each="t : ${testimonials}">
+            <div class="stars" th:text="${t.stars()}"></div>
+            <p th:text="'&quot;' + ${t.message()} + '&quot;'"></p>
+            <div class="author">— <span th:text="${t.name()}"></span></div>
+        </div>
+    </div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="newsletter">
+    <h2>Stay in the Loop</h2>
+    <p>Get notified about new arrivals, offers, and exclusive collections</p>
+    <div class="newsletter-form">
+        <input type="email" placeholder="Enter your email address"/>
+        <button onclick="alert('Thank you for subscribing!')">Subscribe</button>
+    </div>
+</div>
+
+<!-- INFO BAR -->
+<div class="info-bar" id="contact">
+    <div class="info-item"><div class="icon">🏪</div><h4>Visit Us</h4><p>MG Road, City Center</p></div>
+    <div class="info-item"><div class="icon">📞</div><h4>Call Us</h4><p>+91 98765 43210</p></div>
+    <div class="info-item"><div class="icon">🕐</div><h4>Working Hours</h4><p>Mon–Sun: 10am – 8pm</p></div>
+    <div class="info-item"><div class="icon">🚚</div><h4>Free Delivery</h4><p>Orders above ₹10,000</p></div>
+    <div class="info-item"><div class="icon">🔒</div><h4>Certified Quality</h4><p>BIS Hallmarked Gold</p></div>
+</div>
+
+<footer>
+    &copy; 2026 <span th:text="${shopName}">Lakshmi Jewellers</span>. All rights reserved. Crafted with ❤️
+</footer>
+
+<script>
+    let cartCount = 0;
+
+    function addToCart(btn) {
+        cartCount++;
+        document.getElementById('cartCount').textContent = cartCount;
+        btn.textContent = '✓ Added';
+        btn.style.background = '#4CAF50';
+        setTimeout(() => { btn.textContent = 'Add to Cart'; btn.style.background = ''; }, 1500);
+    }
+
+    function toggleWishlist(btn) {
+        btn.textContent = btn.textContent === '🤍' ? '❤️' : '🤍';
+    }
+
+    let activeFilter = 'All';
+    function setFilter(cat, el) {
+        activeFilter = cat;
+        document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        document.querySelectorAll('#productGrid .product-card').forEach(card => {
+            card.style.display = (activeFilter === 'All' || card.dataset.category === activeFilter) ? '' : 'none';
+        });
+    }
+</script>
+</body>
+</html>
